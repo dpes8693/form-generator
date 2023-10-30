@@ -59,6 +59,9 @@
         <el-button class="delete-btn" icon="el-icon-delete" type="text" @click="empty">
           清空
         </el-button>
+        <el-button type="text" @click="clog">
+          匯入json
+        </el-button>
       </div>
       <el-scrollbar class="center-scrollbar">
         <el-row class="center-board-row" :gutter="formConf.gutter">
@@ -358,6 +361,14 @@ export default {
         fields: deepClone(this.drawingList),
         ...this.formConf
       }
+    },
+    clog() {
+      const inputJson = prompt('json', '')
+      const inputJsonObj = JSON.parse(inputJson)
+      const fields = deepClone(inputJsonObj.fields)
+      delete inputJsonObj.fields
+      this.drawingList = fields
+      this.formConf = deepClone(inputJsonObj)
     },
     generate(data) {
       const func = this[`exec${titleCase(this.operationType)}`]
