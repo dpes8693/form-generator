@@ -31,10 +31,18 @@
                   css
                 </span>
               </el-tab-pane>
+              <el-tab-pane name="pure">
+                <span slot="label">
+                  <i v-if="activeTab==='pure'" class="el-icon-edit" />
+                  <i v-else class="el-icon-document" />
+                  pure
+                </span>
+              </el-tab-pane>
             </el-tabs>
             <div v-show="activeTab==='html'" id="editorHtml" class="tab-editor" />
             <div v-show="activeTab==='js'" id="editorJs" class="tab-editor" />
             <div v-show="activeTab==='css'" id="editorCss" class="tab-editor" />
+            <div v-show="activeTab==='pure'" id="editorPure" class="tab-editor" />
           </el-col>
           <el-col :md="24" :lg="12" class="right-preview">
             <div class="action-bar" :style="{'text-align': 'left'}">
@@ -84,7 +92,9 @@ import {
 } from '@/components/generator/html'
 import { makeUpJs } from '@/components/generator/js'
 import { makeUpCss } from '@/components/generator/css'
-import { exportDefault, beautifierConf, titleCase } from '@/utils/index'
+import {
+  exportDefault, beautifierConf, titleCase, deepClone
+} from '@/utils/index'
 import ResourceDialog from './ResourceDialog'
 import loadMonaco from '@/utils/loadMonaco'
 import loadBeautifier from '@/utils/loadBeautifier'
@@ -92,12 +102,14 @@ import loadBeautifier from '@/utils/loadBeautifier'
 const editorObj = {
   html: null,
   js: null,
-  css: null
+  css: null,
+  pure: null
 }
 const mode = {
   html: 'html',
   js: 'javascript',
-  css: 'css'
+  css: 'css',
+  pure: 'html'
 }
 let beautifier
 let monaco
@@ -111,6 +123,7 @@ export default {
       htmlCode: '',
       jsCode: '',
       cssCode: '',
+      pureCode: '',
       codeFrame: '',
       isIframeLoaded: false,
       isInitcode: false, // 保证open后两个异步只执行一次runcode
@@ -160,18 +173,24 @@ export default {
       this.htmlCode = makeUpHtml(this.formData, type)
       this.jsCode = makeUpJs(this.formData, type)
       this.cssCode = makeUpCss(this.formData)
+      // 取得表單的值 轉換成 code
+      const tmp = makeUpHtml(deepClone(this.formData), type)
+      // 做處理
+      this.pureCode = tmp.replaceAll('el-form', 'pure-form')
 
       loadBeautifier(btf => {
         beautifier = btf
         this.htmlCode = beautifier.html(this.htmlCode, beautifierConf.html)
         this.jsCode = beautifier.js(this.jsCode, beautifierConf.js)
         this.cssCode = beautifier.css(this.cssCode, beautifierConf.html)
+        this.pureCode = beautifier.html(this.pureCode, beautifierConf.html)
 
         loadMonaco(val => {
           monaco = val
           this.setEditorValue('editorHtml', 'html', this.htmlCode)
           this.setEditorValue('editorJs', 'js', this.jsCode)
           this.setEditorValue('editorCss', 'css', this.cssCode)
+          this.setEditorValue('editorPure', 'pure', this.pureCode)
           if (!this.isInitcode) {
             this.isRefreshCode = true
             this.isIframeLoaded && (this.isInitcode = true) && this.runCode()
@@ -230,6 +249,7 @@ export default {
               html: editorObj.html.getValue(),
               js: jsCodeStr.replace(exportDefault, ''),
               css: editorObj.css.getValue(),
+              pure: editorObj.html.getValue(),
               scripts: this.scripts,
               links: this.links
             }
@@ -247,6 +267,7 @@ export default {
         console.error(err)
       }
     },
+    // 複製代碼
     generateCode() {
       const html = vueTemplate(editorObj.html.getValue())
       const script = vueScript(editorObj.js.getValue())
