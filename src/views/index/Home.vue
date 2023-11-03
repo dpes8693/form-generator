@@ -59,7 +59,7 @@
         <el-button class="delete-btn" icon="el-icon-delete" type="text" @click="empty">
           清空
         </el-button>
-        <el-button type="text" @click="clog">
+        <el-button type="text" @click="customImportJson">
           匯入json
         </el-button>
       </div>
@@ -362,7 +362,7 @@ export default {
         ...this.formConf
       }
     },
-    clog() {
+    customImportJson() {
       const inputJson = prompt('json', '')
       const inputJsonObj = JSON.parse(inputJson)
       const fields = deepClone(inputJsonObj.fields)
@@ -371,6 +371,7 @@ export default {
       this.formConf = deepClone(inputJsonObj)
     },
     generate(data) {
+      // 執行xxx 請看下面三個
       const func = this[`exec${titleCase(this.operationType)}`]
       this.generateConf = data
       func && func(data)

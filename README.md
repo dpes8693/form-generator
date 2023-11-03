@@ -21,4 +21,10 @@ Home.vue
 加入 `匯入 json` 功能
 
 ## gh-pages
+
 yarn add gh-pages
+
+## element 版本
+
+index.html => 2.13.2 => 2020-05-18
+newest => 2.15.4 => 2021-08-03
