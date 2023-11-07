@@ -35,7 +35,7 @@
                 <span slot="label">
                   <i v-if="activeTab==='pure'" class="el-icon-edit" />
                   <i v-else class="el-icon-document" />
-                  pure
+                  pure-admin 需要
                 </span>
               </el-tab-pane>
             </el-tabs>
@@ -93,7 +93,7 @@ import {
 import { makeUpJs } from '@/components/generator/js'
 import { makeUpCss } from '@/components/generator/css'
 import {
-  exportDefault, beautifierConf, titleCase, deepClone
+  exportDefault, beautifierConf, titleCase, deepClone, pureAdminCodeParser
 } from '@/utils/index'
 import ResourceDialog from './ResourceDialog'
 import loadMonaco from '@/utils/loadMonaco'
@@ -119,7 +119,7 @@ export default {
   props: ['formData', 'generateConf'],
   data() {
     return {
-      activeTab: 'html',
+      activeTab: 'pure',
       htmlCode: '',
       jsCode: '',
       cssCode: '',
@@ -174,9 +174,13 @@ export default {
       this.jsCode = makeUpJs(this.formData, type)
       this.cssCode = makeUpCss(this.formData)
       // 取得表單的值 轉換成 code
-      const tmp = makeUpHtml(deepClone(this.formData), type)
+      const oldHtmlCode = makeUpHtml(deepClone(this.formData), type)
       // 做處理
-      this.pureCode = tmp.replaceAll('el-form', 'pure-form')
+      if (type === 'dialog') {
+        this.pureCode = pureAdminCodeParser(oldHtmlCode)
+      } else if (type === 'file') {
+        this.pureCode = oldHtmlCode
+      }
 
       loadBeautifier(btf => {
         beautifier = btf

@@ -155,3 +155,16 @@ export function isObjectNull(t) {
 export function isObjectUnde(t) {
   return toStr(t) === '[object Undefined]'
 }
+/**
+ * 客製化的轉換器
+ *  規則有2種 [表單, 彈出視窗]
+ *  目前只針對彈出視窗做處理,取出<el-form>
+ */
+export function pureAdminCodeParser(input) {
+  const regex = /<el-form[^>]*>[\s\S]*?<\/el-form>/
+  const match = input.match(regex)
+  if (match) {
+    return match[0]
+  }
+  return ''
+}
